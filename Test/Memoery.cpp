@@ -87,6 +87,7 @@ public:
                 return i;
             }
         }
+        std::cout << "no free block;" <<std::endl;
         return -1;
     }
 
@@ -174,17 +175,22 @@ public:
             const std::string& valueData = valueBuffer[i];
 
             int freeBlockIndex = findFreeBlock();
-            diskFile.seekp(freeBlockIndex*BLOCK_SIZE);
-            // 写入 value 到磁盘
-            diskFile.write(valueData.data(), valueData.size());
-            block_bitmap.set(freeBlockIndex);  // 标记为已使用
-            
-            int key = deserializeKey(keyData);
-            HashMap[key].BlockIndex = freeBlockIndex;
-            HashMap[key].in_memory = false;
-            HashMap[key].length = valueData.size();
 
-            std::cout << "Flushed key " << key << " to disk at BlockIndex " << HashMap[key].BlockIndex << "  length is " << valueData.size() <<std::endl;
+            if(freeBlockIndex!=-1){
+                diskFile.seekp(freeBlockIndex*BLOCK_SIZE);
+                // 写入 value 到磁盘
+                diskFile.write(valueData.data(), valueData.size());
+                block_bitmap.set(freeBlockIndex);  // 标记为已使用
+
+                int key = deserializeKey(keyData);
+                HashMap[key].BlockIndex = freeBlockIndex;
+                HashMap[key].in_memory = false;
+                HashMap[key].length = valueData.size();
+                std::cout << "Flushed key " << key << " to disk at BlockIndex " << HashMap[key].BlockIndex << "  length is " << valueData.size() <<std::endl;
+            }else{
+                std::cout << "Space is full"  << std::endl;
+                return;
+            }
         }
         diskFile.close();
         keyBuffer.clear();
@@ -210,8 +216,14 @@ public:
         return readStr;
     }
 
-    void Del(int& key){
-
+    void DelValue(int& key){
+        auto it = HashMap.find(key);
+        if (it != HashMap.end()) {
+            block_bitmap.reset(it->second.BlockIndex);//图节点
+            HashMap.erase(it); // 删除与 some_key 相关联的元素
+        } else{
+            std::cout << "key not here" << std::endl;
+        }
     }
 };
 
@@ -224,7 +236,7 @@ int main() {
 
     std::cout << "Testing write operations..." << std::endl;
 
-    for(int i = 0;i< 100;i++){
+    for(int i = 0;i< 17000;i++){
         kvStore.write(i,i*15);
     }
 
