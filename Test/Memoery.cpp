@@ -11,6 +11,7 @@
 #include <list>
 #include <mutex>
 #include <bitset>
+#include <shared_mutex>
 
 const size_t BLOCK_SIZE = 64;              // 块大小
 const size_t TOTAL_BLOCKS = 1024 * 1024 / 64; // 1MB 文件，共 16384 块
@@ -56,6 +57,8 @@ private:
     LRUCache Cache;
     int LruCapacity;
     std::mutex cacheMutex; // 保护 Cache
+    std::shared_mutex rw_mutex;//读写锁
+
 
 
 
@@ -126,6 +129,9 @@ public:
 
     template<typename T>
     bool write(const int& key, const T& value) {
+
+        std::unique_lock<std::shared_mutex> lock(rw_mutex);
+
         std::string serializeValueData = serializeValue(value);
         keyBuffer.push_back(serializeKey(key));
         valueBuffer.push_back(serializeValue(value));
@@ -141,6 +147,9 @@ public:
 
     // 从内存或磁盘中读取数据的实现
     std::string read(const int& key) {
+
+        std::shared_lock<std::shared_mutex> lock(rw_mutex);
+
         std::string Data = Cache.get(key);
         if(Data.size() != 0){
             std::cout << "在cache中找" << std::endl;
