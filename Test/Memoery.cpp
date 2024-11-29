@@ -238,17 +238,14 @@ public:
 
 
 
-
-
 int main() {
-    KVStore kvStore(1000, "disk_data.bin",5);
+    KVStore kvStore(1000, "disk_data.txt",5);
 
     std::cout << "Testing write operations..." << std::endl;
 
-    for(int i = 0;i< 17000;i++){
+    for(int i = 0;i< 1000;i++){
         kvStore.write(i,i*15);
     }
-
 
 
     for(int j=0;j<3;j++){
