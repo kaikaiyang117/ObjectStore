@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+
 const size_t BLOCK_SIZE = 64;              // 块大小
 const size_t TOTAL_BLOCKS = 1024 * 1024 / 64; // 1MB 文件，共 16384 块
 const std::string DISK_FILE = "disk.bin";  // 使用 .bin 后缀文件
