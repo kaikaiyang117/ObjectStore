@@ -79,7 +79,7 @@ MessageValue getMessageValue(const GenericMessage& message) {
 // 辅助函数：根据返回的 MessageValue 的类型进行处理
 void printMessageValue(const MessageValue& value) {
     std::visit([](auto&& arg) {
-        std::cout << "Deserialized value: " << arg << std::endl;
+        std::cout << "value: " << arg << std::endl;
     }, value);
 }
 

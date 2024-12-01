@@ -23,13 +23,16 @@ add_library(kvstore SHARED
 target_link_libraries(kvstore ${Protobuf_LIBRARIES})
 
 # 主程序
-add_executable(${PROJECT_NAME} Test/TestSerial.cpp include/serialize.h include/KVStore.h)
-target_link_libraries(${PROJECT_NAME} kvstore pthread)
+add_executable(TestSerial Test/TestSerial.cpp include/serialize.h include/KVStore.h)
+target_link_libraries(TestSerial kvstore pthread)
 
-# 测试程序 TestMemoery
+
 add_executable(Main main.cpp include/KVStore.h)
 target_link_libraries(Main kvstore pthread)
 
 
 add_executable(TestWrite Test/testWrite.cpp include/LRUCache.h)
 target_link_libraries(TestWrite kvstore pthread)
+
+add_executable(TestKVstore Test/TestKVstore.cpp include/KVStore.h)
+target_link_libraries(TestKVstore kvstore pthread)

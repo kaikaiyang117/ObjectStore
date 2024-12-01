@@ -45,7 +45,7 @@ private:
     std::unordered_map<int, KVNode> HashMap;//节点哈希表
     std::mutex hashMapMutex; // 保护 HashMap
 
-    //两个写缓冲大小
+
     std::vector<std::string> keyBuffer;
     std::vector<std::string> valueBuffer;
     std::mutex bufferMutex; // 保护 keyBuffer 和 valueBuffer
@@ -92,6 +92,10 @@ public:
 //对value进行反序列化
     template<typename T>
     void deserializeValue(const std::string& binaryData) {
+        if(binaryData.length()==0){
+            std::cout << "data not here " << std::endl;
+            return;
+        }
         GenericMessage deserializedMessage = deserializeMessage(binaryData);
         auto value = getMessageValue(deserializedMessage);
         printMessageValue(value);

@@ -49,17 +49,14 @@ int  KVStore::deserializeKey(const std::string& serialDataKey) {
 }
 
 
-
-
-
 // 从内存或磁盘中读取数据的实现
 std::string KVStore::read(const int& key) {
 
-    std::shared_lock<std::shared_mutex> lock(rw_mutex);
-
+//    std::shared_lock<std::shared_mutex> lock(rw_mutex);
+    std::unique_lock<std::shared_mutex> lock(rw_mutex);
     std::string Data = Cache.get(key);
     if(Data.size() != 0){
-        std::cout << "在cache中找" << std::endl;
+//        std::cout << "在cache中找" << std::endl;
         return Data;
     }
 
@@ -67,10 +64,10 @@ std::string KVStore::read(const int& key) {
         KVNode& node = HashMap[key];
         std::string result;
         if (node.in_memory) {
-            std::cout << "在写缓冲区中找" << std::endl;
+//            std::cout << "在写缓冲区中找" << std::endl;
             result = valueBuffer[node.memory_address];
         } else {
-            std::cout << "在磁盘中找" << std::endl;
+//            std::cout << "在磁盘中找" << std::endl;
             result = readFromDisk(node.BlockIndex, node.length);
         }
         LRUCacheNode LruNode{key,result};
@@ -85,13 +82,11 @@ void KVStore::flushBuffersToDisk() {
     if (!diskFile.is_open()) {
         throw std::runtime_error("无法打开磁盘文件");
     }
-
     for (size_t i = 0; i < keyBuffer.size(); ++i) {
         const std::string& keyData = keyBuffer[i];
         const std::string& valueData = valueBuffer[i];
 
         int freeBlockIndex = findFreeBlock();
-
         if(freeBlockIndex!=-1){
             diskFile.seekp(freeBlockIndex*BLOCK_SIZE);
             // 写入 value 到磁盘
@@ -102,23 +97,26 @@ void KVStore::flushBuffersToDisk() {
             HashMap[key].BlockIndex = freeBlockIndex;
             HashMap[key].in_memory = false;
             HashMap[key].length = valueData.size();
-            std::cout << "Flushed key " << key << " to disk at BlockIndex " << HashMap[key].BlockIndex << "  length is " << valueData.size() <<std::endl;
+//            std::cout << "Flushed key " << key << " to disk at BlockIndex " << HashMap[key].BlockIndex << "  length is " << valueData.size() <<std::endl;
         }else{
             std::cout << "Space is full"  << std::endl;
             return;
         }
     }
+    std::cout << "Flushed finished" << std::endl;
+//    HashMap.clear();
+
     diskFile.close();
     keyBuffer.clear();
     valueBuffer.clear();
 }
 
 std::string KVStore::readFromDisk(int blockIndex, size_t length) {
+
     if (blockIndex < 0 || blockIndex >= TOTAL_BLOCKS || !block_bitmap.test(blockIndex)) {
         std::cerr << "Invalid block index or block is not in use!\n";
         return "";
     }
-
     std::ifstream inFile(disk_filename, std::ios::binary);
     if (!inFile.is_open()) {
         throw std::runtime_error("无法打开磁盘文件进行读取");
@@ -137,6 +135,7 @@ void KVStore::DelValue(int& key){
     if (it != HashMap.end()) {
         block_bitmap.reset(it->second.BlockIndex);//图节点
         HashMap.erase(it); // 删除与 some_key 相关联的元素
+        Cache.remove(key);
     } else {
         std::cout << "key not here" << std::endl;
     }

@@ -9,9 +9,6 @@ int main() {
     std::string serializedData = serializeMessage(message);
     GenericMessage deserializedMessage = deserializeMessage(serializedData);
     auto value = getMessageValue(deserializedMessage);
-
     printMessageValue(value);
-
-//    getchar();
     return 0;
 }
