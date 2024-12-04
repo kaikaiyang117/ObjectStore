@@ -7,7 +7,7 @@
 #include <thread>
 #include <iostream>
 
-const int count = 100000;
+const int count = 10000;
 std::unordered_map<int, std::condition_variable> cv_map;
 std::unordered_map<int, std::mutex> mtx_map;
 std::unordered_map<int, bool> write_done_map;
@@ -63,11 +63,14 @@ int main() {
     // 启动写者线程
     for (int i = 0; i < writerNum; ++i) {
         threads.emplace_back(writerThread, std::ref(kvStore), i);
+
     }
+    std::cout << "create " << writerNum << " writer" <<  std::endl;
     // 启动读者线程
     for (int i = 0; i < readerNum; ++i) {
         threads.emplace_back(readerThread, std::ref(kvStore), i);
     }
+    std::cout << "create " << readerNum << " reader" <<  std::endl;
     for (auto &t : threads) {
         if (t.joinable()) {
             t.join();

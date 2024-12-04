@@ -9,20 +9,16 @@ find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(include)
 
-# 生成 Protobuf C++ 文件
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS generic.proto)
+#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS generic.proto)
 
-# 定义共享库 kvstore
-add_library(kvstore SHARED
-        src/KVStore.cpp
-        src/LRUCache.cpp
-        ${PROTO_SRCS} # 包含生成的 Protobuf 源文件
-)
+## 定义共享库 kvstore
+#add_library(kvstore SHARED
+#        src/KVStore.cpp
+#        src/LRUCache.cpp
+#        ${PROTO_SRCS} # 包含生成的 Protobuf 源文件
+#)
+link_directories(so)
 
-# 链接 Protobuf 到共享库
-target_link_libraries(kvstore ${Protobuf_LIBRARIES})
-
-# 主程序
 add_executable(TestSerial Test/TestSerial.cpp include/serialize.h include/KVStore.h)
 target_link_libraries(TestSerial kvstore pthread)
 
