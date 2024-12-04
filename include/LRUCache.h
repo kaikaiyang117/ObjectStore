@@ -29,6 +29,7 @@ public:
 
     // 显示缓存内容（用于调试）
     void display() const;
+    void remove(int& key);
 
 private:
     size_t capacity;  // 缓存容量

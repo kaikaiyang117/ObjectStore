@@ -46,3 +46,16 @@ void LRUCache::display() const {
     }
     std::cout << std::endl;
 }
+
+// 删除缓存中的节点
+void LRUCache::remove(int& key) {
+    auto it = cacheMap.find(key);  // 查找指定的 key
+    if (it != cacheMap.end()) {
+        // 找到节点，删除它
+        cacheList.erase(it->second);  // 从链表中删除
+        cacheMap.erase(it);  // 从哈希表中删除
+    } else {
+
+        std::cerr << "Key " << key << " not found in cache." << std::endl;
+    }
+}

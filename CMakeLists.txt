@@ -1,31 +1,34 @@
 cmake_minimum_required(VERSION 3.5)
 project(GenericProtobufExample)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 查找Protobuf包
+# 查找 Protobuf 包
 find_package(Protobuf REQUIRED)
-
-# 包含Protobuf头文件目录
-include_directories(${PROTOBUF_INCLUDE_DIR})
-include_directories(Test)
+include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(include)
 
-# 生成Protobuf编译的C++文件
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS generic.proto)
+#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS generic.proto)
 
-add_executable(${PROJECT_NAME} main.cpp ${PROTO_SRCS} ${PROTO_HDRS}
-        include/serialize.h)
+## 定义共享库 kvstore
+#add_library(kvstore SHARED
+#        src/KVStore.cpp
+#        src/LRUCache.cpp
+#        ${PROTO_SRCS} # 包含生成的 Protobuf 源文件
+#)
+link_directories(so)
 
-target_link_libraries(${PROJECT_NAME} ${PROTOBUF_LIBRARIES})
+add_executable(TestSerial Test/TestSerial.cpp include/serialize.h include/KVStore.h)
+target_link_libraries(TestSerial kvstore pthread)
 
-add_executable(TestMemoery Test/Memoery.cpp ${PROTO_SRCS} ${PROTO_HDRS}
-        include/serialize.h
-        src/LRUCache.cpp
-        include/LRUCache.h
-        src/LRUCache.cpp)
-target_link_libraries(TestMemoery ${PROTOBUF_LIBRARIES})
 
-add_executable(TestWrite Test/testWrite.cpp
-        include/LRUCache.h
-        src/LRUCache.cpp)
+add_executable(Main main.cpp include/KVStore.h)
+target_link_libraries(Main kvstore pthread)
+
+
+add_executable(TestWrite Test/testWrite.cpp include/LRUCache.h)
+target_link_libraries(TestWrite kvstore pthread)
+
+add_executable(TestKVstore Test/TestKVstore.cpp include/KVStore.h)
+target_link_libraries(TestKVstore kvstore pthread)
